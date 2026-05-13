@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GS Mwendo - Primary Math Game</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            text-align: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            transition: background 0.6s;
+            position: relative;
+        }
+        .header {
+            background: rgba(0,0,0,0.3);
+            padding: 12px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        .logo { width: 90px; height: 90px; border-radius: 50%; border: 3px solid white; }
+        .container { max-width: 620px; margin: 15px auto; padding: 15px; }
+        .card {
+            background: white; color: #333; border-radius: 18px;
+            padding: 25px; margin: 15px auto; box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+        button {
+            padding: 12px 24px; margin: 6px; border: none;
+            border-radius: 10px; font-size: 16px; cursor: pointer;
+            transition: all 0.2s;
+        }
+        button:hover { transform: translateY(-2px); }
+        .op-btn { background: #20c997; color: white; }
+        .diff-btn { background: #0d6efd; color: white; }
+        .page { display: none; }
+        .active { display: block; }
+        #q { font-size: 2.4rem; margin: 20px 0; color: #0d6efd; }
+        #feedback { font-size: 2rem; font-weight: bold; margin: 12px 0; min-height: 40px; }
+        .settings-btn {
+            position: fixed; bottom: 20px; right: 20px;
+            background: #ffc107; color: #333; width: 55px; height: 55px;
+            border-radius: 50%; font-size: 26px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 2000; align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background: white; color: #333; padding: 20px; border-radius: 12px; width: 90%; max-width: 380px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <img src="gs mwnd tss.png" alt="GS Mwendo Logo" class="logo" onerror="this.src='https://via.placeholder.com/90?text=GS+MWENDO';">
+        <div>
+            <h2>GS MWENDO PRIMARY SCHOOL</h2>
+            <p>Educational Math Game for Primary Students</p>
+        </div>
+    </div>
+
+    <!-- HOME -->
+    <div id="home" class="page active container">
+        <div class="card">
+            <h1>Welcome to GS Mwendo Math Game</h1>
+            <button onclick="go('login')" style="background:#0d6efd; font-size:18px; padding:16px 40px;">Start Game</button>
+        </div>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="login" class="page container">
+        <div class="card">
+            <h2>Enter Your Name</h2>
+            <input type="text" id="studentName" placeholder="Your full name" required style="width:80%; padding:12px;">
+            <br><br>
+            <button onclick="startLogin()" style="background:#20c997; font-size:18px;">Continue</button>
+        </div>
+    </div>
+
+    <!-- MENU -->
+    <div id="menu" class="page container">
+        <div class="card">
+            <h2 id="welcomeText"></h2>
+            <button onclick="go('levels')" style="background:#0d6efd; padding:16px 40px; font-size:18px;">Start New Game</button>
+            <button onclick="showLeaderboard()" style="background:#ffc107; color:#333;">Leaderboard</button>
+        </div>
+    </div>
+
+    <!-- LEVELS -->
+    <div id="levels" class="page container">
+        <div class="card">
+            <h2>Select Your Class (P1 - P6)</h2>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0;">
+                <button onclick="selectLevel(1)">P1</button>
+                <button onclick="selectLevel(2)">P2</button>
+                <button onclick="selectLevel(3)">P3</button>
+                <button onclick="selectLevel(4)">P4</button>
+                <button onclick="selectLevel(5)">P5</button>
+                <button onclick="selectLevel(6)">P6</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- OPERATIONS -->
+    <div id="operations" class="page container">
+        <div class="card">
+            <h2 id="levelTitle">Select Operation</h2>
+            <div id="operationButtons"></div>
+            <div id="difficulty" style="margin-top: 25px;"></div>
+        </div>
+    </div>
+
+    <!-- GAME -->
+    <div id="game" class="page container">
+        <div class="card">
+            <h3>Question <span id="currentQ">1</span>/15</h3>
+            <div id="feedback"></div>
+            <h1 id="q"></h1>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px;">
+                <button id="b0" onclick="answer(0)"></button>
+                <button id="b1" onclick="answer(1)"></button>
+                <button id="b2" onclick="answer(2)"></button>
+                <button id="b3" onclick="answer(3)"></button>
+            </div>
+            <p id="scoreDisplay" style="margin-top:15px; font-size:18px;"></p>
+        </div>
+    </div>
+
+    <!-- RESULT -->
+    <div id="result" class="page container">
+        <div class="card">
+            <h1>Game Complete!</h1>
+            <p id="studentResult" style="font-size:20px;"></p>
+            <h2 id="finalScore"></h2>
+            <h3 id="percentage"></h3>
+            <h3 id="grade"></h3>
+            <div id="motivationText" class="motivation"></div>
+            
+            <button onclick="repeatVoice()" style="background:#0d6efd; margin:8px;">Play Voice Again</button>
+            <button onclick="showLeaderboard()" style="background:#ffc107; color:#333; margin:8px;">Leaderboard</button>
+            <button onclick="go('menu')" style="background:#0d6efd; margin:8px;">Home</button>
+        </div>
+    </div>
+
+    <!-- LEADERBOARD -->
+    <div id="leaderboard" class="page container">
+        <div class="card">
+            <h1>Top Students</h1>
+            <div id="leaderList"></div>
+            <button onclick="go('menu')" style="margin-top:20px;">Back to Menu</button>
+        </div>
+    </div>
+
+    <button class="settings-btn" onclick="openSettings()">⚙️</button>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <h2>Game Settings</h2>
+            <p>
+                <label><input type="checkbox" id="soundToggle" checked> Sound Effects</label><br><br>
+                <label><input type="checkbox" id="voiceToggle" checked> Voice Feedback</label>
+            </p>
+            <button onclick="saveSettings()" style="background:#0d6efd; color:white; width:100%; padding:12px;">Save</button>
+            <button onclick="closeSettings()" style="background:#6c757d; color:white; width:100%; padding:12px; margin-top:8px;">Close</button>
+        </div>
+    </div>
+
+<script>
+let studentName = "", selectedLevel = 0, selectedType = "", score = 0, index = 0, correct = 0;
+let questions = [];
+let soundEnabled = true;
+let voiceEnabled = true;
+
+function go(page) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(page).classList.add('active');
+}
+
+function startLogin() {
+    studentName = document.getElementById("studentName").value.trim();
+    if (!studentName) return alert("Please enter your name!");
+    document.getElementById("welcomeText").innerHTML = `Welcome, <b>${studentName}</b>`;
+    go('menu');
+}
+
+function selectLevel(lvl) {
+    selectedLevel = lvl;
+    document.getElementById("levelTitle").innerText = `P${lvl} - Select Operation`;
+    let btns = `<button class="op-btn" onclick="choose('add')">Addition</button>
+                <button class="op-btn" onclick="choose('sub')">Subtraction</button>
+                <button class="op-btn" onclick="choose('mul')">Multiplication</button>
+                <button class="op-btn" onclick="choose('div')">Division</button>`;
+    if (lvl === 6) {
+        btns += `<button class="op-btn" onclick="choose('algebra')">Algebra</button>
+                 <button class="op-btn" onclick="choose('statistics')">Statistics</button>`;
+    }
+    document.getElementById("operationButtons").innerHTML = btns;
+    go('operations');
+}
+
+function choose(type) {
+    selectedType = type;
+    document.getElementById("difficulty").innerHTML = `
+        <h3>Choose Difficulty</h3>
+        <button class="diff-btn" onclick="startGame('easy')">Easy</button>
+        <button class="diff-btn" onclick="startGame('medium')">Medium</button>
+        <button class="diff-btn" onclick="startGame('hard')">Hard</button>`;
+}
+
+function startGame(difficulty) {
+    score = 0; index = 0; questions = [];
+    let max = difficulty === 'easy' ? 10 : difficulty === 'medium' ? 20 : 50;
+
+    for (let i = 0; i < 15; i++) {
+        let a = Math.floor(Math.random() * max) + 1;
+        let b = Math.floor(Math.random() * max) + 1;
+        let ans, q;
+        if (selectedType === "add") { ans = a + b; q = `${a} + ${b}`; }
+        else if (selectedType === "sub") { ans = Math.max(a,b) - Math.min(a,b); q = `${Math.max(a,b)} - ${Math.min(a,b)}`; }
+        else if (selectedType === "mul") { ans = a * b; q = `${a} x ${b}`; }
+        else if (selectedType === "div") { ans = a; q = `${a*b} / ${b}`; }
+        else if (selectedType === "algebra") { ans = a; q = `x + ${b} = ${a+b} → x = ?`; }
+        else if (selectedType === "statistics") {
+            let nums = [a, b, a+2, b+1];
+            ans = Math.round((a + b + a+2 + b+1)/4);
+            q = `Mean of ${nums.join(", ")} = ?`;
+        }
+        questions.push({ q: q, ans: ans });
+    }
+
+    if (difficulty === 'easy') document.body.style.background = 'linear-gradient(135deg, #20c997, #0f766e)';
+    if (difficulty === 'medium') document.body.style.background = 'linear-gradient(135deg, #ffc107, #e0a800)';
+    if (difficulty === 'hard') document.body.style.background = 'linear-gradient(135deg, #dc3545, #b02a37)';
+
+    go('game');
+    nextQuestion();
+}
+
+function nextQuestion() {
+    if (index >= 15) return showResult();
+    let qn = questions[index];
+    document.getElementById("q").innerText = qn.q;
+    correct = qn.ans;
+
+    let options = [correct, correct+1, correct-1, correct+2];
+    options.sort(() => Math.random() - 0.5);
+
+    for (let i = 0; i < 4; i++) document.getElementById("b" + i).innerText = options[i];
+
+    document.getElementById("currentQ").innerText = index + 1;
+    document.getElementById("scoreDisplay").innerText = `Score: ${score}`;
+    document.getElementById("feedback").innerHTML = "";
+}
+
+function answer(choice) {
+    const selectedAnswer = parseInt(document.getElementById("b" + choice).innerText);
+    const feedbackDiv = document.getElementById("feedback");
+
+    if (selectedAnswer === correct) {
+        score++;
+        feedbackDiv.innerHTML = "<span style='color:#20c997'>WOW! Correct</span>";
+        if (voiceEnabled) speakWoman(`${questions[index].q} equals ${correct}`);
+    } else {
+        feedbackDiv.innerHTML = "<span style='color:#dc3545'>WRONG</span>";
+    }
+
+    setTimeout(() => {
+        index++;
+        nextQuestion();
+    }, 900);
+}
+
+function speakWoman(text) {
+    if ('speechSynthesis' in window) {
+        speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = "en-US";
+        utterance.rate = 0.95;
+        utterance.pitch = 1.35;   // Female voice
+        speechSynthesis.speak(utterance);
+    }
+}
+
+function speak(text) {
+    if (voiceEnabled && 'speechSynthesis' in window) {
+        speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = "en-US";
+        utterance.rate = 0.92;
+        speechSynthesis.speak(utterance);
+    }
+}
+
+function showResult() {
+    let percent = Math.round((score / 15) * 100);
+    let grade = percent >= 80 ? "A" : percent >= 60 ? "B" : percent >= 40 ? "C" : "F";
+
+    document.getElementById("studentResult").innerText = `Student: ${studentName}`;
+    document.getElementById("finalScore").innerHTML = `Score: <b>${score}/15</b>`;
+    document.getElementById("percentage").innerHTML = `Percentage: <b>${percent}%</b>`;
+    document.getElementById("grade").innerHTML = `Grade: <b>${grade}</b>`;
+
+    let motivation = document.getElementById("motivationText");
+    if (percent >= 80) {
+        motivation.style.color = "#20c997";
+        motivation.innerHTML = "WELL DONE!<br>WELL DONE!<br>WELL DONE!<br>EXCELLENT JOB!";
+        speak("Well done! Excellent job!");
+    } else if (percent >= 60) {
+        motivation.style.color = "#ffc107";
+        motivation.innerHTML = "WELL DONE!<br>GOOD EFFORT!<br>KEEP PRACTICING!";
+        speak("Well done! Good effort!");
+    } else {
+        motivation.style.color = "#dc3545";
+        motivation.innerHTML = "TRY AGAIN!<br>TRY AGAIN!<br>YOU CAN DO BETTER!<br>DON'T GIVE UP!";
+        speak("Try again. You can do better.");
+    }
+
+    saveScore(score, percent);
+    go('result');
+}
+
+function repeatVoice() {
+    let percent = Math.round((score / 15) * 100);
+    if (percent >= 80) speak("Well done! Excellent job!");
+    else if (percent >= 60) speak("Well done! Good effort!");
+    else speak("Try again. You can do better.");
+}
+
+function openSettings() {
+    document.getElementById("soundToggle").checked = soundEnabled;
+    document.getElementById("voiceToggle").checked = voiceEnabled;
+    document.getElementById("settingsModal").style.display = "flex";
+}
+
+function closeSettings() {
+    document.getElementById("settingsModal").style.display = "none";
+}
+
+function saveSettings() {
+    soundEnabled = document.getElementById("soundToggle").checked;
+    voiceEnabled = document.getElementById("voiceToggle").checked;
+    closeSettings();
+}
+
+function saveScore(scoreVal, percent) {
+    let scores = JSON.parse(localStorage.getItem("mwendoScores")) || [];
+    scores.push({ name: studentName, score: scoreVal, percent: percent, level: selectedLevel, date: new Date().toLocaleDateString() });
+    scores.sort((a,b) => b.score - a.score);
+    localStorage.setItem("mwendoScores", JSON.stringify(scores.slice(0,10)));
+}
+
+function showLeaderboard() {
+    let scores = JSON.parse(localStorage.getItem("mwendoScores")) || [];
+    let html = scores.length ? "" : "<p>No scores yet. Be the first!</p>";
+    scores.forEach((s, i) => {
+        html += `<div>${i+1}. <b>${s.name}</b> (P${s.level}) - ${s.score}/15 (${s.percent}%)</div>`;
+    });
+    document.getElementById("leaderList").innerHTML = html;
+    go('leaderboard');
+}
+</script>
+</body>
+</html>
